@@ -9,7 +9,7 @@ library(corrplot)
 
 generateSample <- function(x)
 {
-  y <- x[sample(nrow(x), 500,replace=T), ]
+  y <- x[sample(nrow(x), 276,replace=T), ]
   return(y)
 }
 
@@ -24,29 +24,35 @@ sample <- sample.int(n = nrow(data), size = floor(.70*nrow(data)), replace = F)
 train_data <- data[sample,] #70% of original dataset
 test_data <- data[-sample,]
 
-rf1 <- randomForest(factor(Species)~Sepal.Length+Petal.Length+Petal.Width,data=train_data)
+##First model on original train data
+rf1 <- train(x=train_data[,1:4], y=train_data[,5], method = "rf", metric = "Accuracy")
 
 
-#train_data2 <- generateSample(train_data)
-rf2 <- randomForest(factor(Species)~Sepal.Length+Petal.Length+Petal.Width,data=generateSample(train_data))
+## All subsequent models will have random sample sets from train data to reduce variance
+train_sample2 <- generateSample(train_data)
+rf2 <- train(x=train_sample2[,1:4], y=train_sample2[,5], method = "rf", metric = "Accuracy")
 
-rp1 <- rpart(factor(Species)~.,data=generateSample(train_data))
-rp2 <- rpart(factor(Species)~.,data=generateSample(train_data))
+train_sample3 <- generateSample(train_data)
+rp1 <- train(x=train_sample3[,1:4], y=train_sample3[,5], method = "rpart", metric = "Accuracy")
 
-
-rf1$confusion
-rf2$confusion
-
-confusionMatrix(predict(rp1,test_data,type = "class"),test_data$Species)
-confusionMatrix(predict(rp2,test_data,type = "class"),test_data$Species)
+train_sample4 <- generateSample(train_data)
+rp2 <- train(x=train_sample4[,1:4], y=train_sample4[,5], method = "rpart", metric = "Accuracy")
 
 
-p1 <- predict(rf1,test_data)
-p2 <- predict(rf2,test_data)
-p3 <- predict(rp1,test_data,type = "class")
-p4 <- predict(rp2,test_data,type = "class")
+confusionMatrix(predict(rf1,test_data),test_data$Species)
+confusionMatrix(predict(rf2,test_data),test_data$Species)
+confusionMatrix(predict(rp1,test_data),test_data$Species)
+confusionMatrix(predict(rp2,test_data),test_data$Species)
 
-combined <- cbind(test_data,p1,p2,p3,p4)
+
+## Let'sPredict using majority votes
+
+rf1_p <- predict(rf1,test_data)
+rf2_p <- predict(rf2,test_data)
+rp1_p <- predict(rp1,test_data,type = "raw")
+rp2_p <- predict(rp2,test_data,type = "raw")
+
+combined <- cbind(test_data,rf1_p,rf2_p,rp1_p,rp2_p)
 
 votes <- combined[,c(6,7,8,9)]
 majority <- apply(votes,1,function(x) names(which.max(table(x))))

@@ -1,11 +1,15 @@
 library(tidyverse)
+library(modelr)
 library(randomForest)
 library(rpart)
 library(caret)
-library(glmnet)
+library(gbm)
 library(lda)
 library(datasets)
 library(corrplot)
+
+##Bagging - Same model different trainset to reduce variance
+
 
 generateSample <- function(x)
 {
@@ -17,7 +21,7 @@ generateSample <- function(x)
 data <- datasets::iris
 
 #Converting factors to characters
-data$Species <- as.character(data$Species)
+#data$Species <- as.character(data$Species)
 str(data)
 
 #Check
@@ -72,6 +76,10 @@ rf1$confusion
 rf2$confusion
 rf3$confusion
 rf4$confusion
+
+
+
+
 
 p1 <- predict(rf1,test_data)
 p2 <- predict(rf2,test_data)
