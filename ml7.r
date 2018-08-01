@@ -103,7 +103,7 @@ all_results <- as.data.frame(all_results)
 all_results$model_name <- c("rf1","rf2","rp1","ld1","gb1")
 all_results$pred_index <- c(6,7,8,9,10)
 
-all_results <- plyr::arrange(all_results,AccuracyPValue,desc(AccuracyLower),desc(Accuracy),desc(Kappa))
+all_results <- plyr::arrange(all_results,desc(Kappa),desc(Accuracy),AccuracyPValue,desc(AccuracyLower))
 all_results
 
 best_model <- all_results[1,8]
